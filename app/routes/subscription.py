@@ -11,17 +11,17 @@ def create_subscription():
     try:
         current_phone = get_jwt_identity()
         data = request.get_json()
-        
+
         user = SubscriptionService.get_user_by_phone(current_phone)
         subscriptions = SubscriptionService.create_subscription(user, data['categories'])
-        
+
         return jsonify([{
             'category': sub.category
         } for sub in subscriptions]), 201
-    
+
     except (ValidationError, NotFoundError) as e:
         return jsonify(e.to_dict()), e.status_code
-    except Exception as e:
+    except Exception:
         return jsonify({
             "error_type": "CreateSubscriptionError",
             "message": "Error creando suscripciones"
@@ -33,14 +33,14 @@ def get_subscriptions():
     try:
         current_phone = get_jwt_identity()
         user = SubscriptionService.get_user_by_phone(current_phone)
-        
+
         return jsonify([{
             'category': sub.category
         } for sub in user.subscriptions]), 200
-    
+
     except NotFoundError as e:
         return jsonify(e.to_dict()), e.status_code
-    except Exception as e:
+    except Exception:
         return jsonify({
             "error_type": "GetSubscriptionsError",
             "message": "Error obteniendo suscripciones"
@@ -53,13 +53,13 @@ def update_subscriptions():
         current_phone = get_jwt_identity()
         data = request.get_json()
         user = SubscriptionService.get_user_by_phone(current_phone)
-        
+
         updated_subs = SubscriptionService.replace_subscriptions(user, data['categories'])
         return jsonify([{'category': sub.category} for sub in updated_subs]), 200
-    
+
     except (ValidationError, NotFoundError) as e:
         return jsonify(e.to_dict()), e.status_code
-    except Exception as e:
+    except Exception:
         return jsonify({
             "error_type": "UpdateSubscriptionsError",
             "message": "Error actualizando suscripciones"
@@ -71,16 +71,16 @@ def delete_subscription(category):
     try:
         current_phone = get_jwt_identity()
         user = SubscriptionService.get_user_by_phone(current_phone)
-        
+
         SubscriptionService.delete_subscription(user, category)
         return jsonify({
             "message": "Suscripción eliminada exitosamente",
             "category": category
         }), 200
-    
+
     except NotFoundError as e:
         return jsonify(e.to_dict()), e.status_code
-    except Exception as e:
+    except Exception:
         return jsonify({
             "error_type": "DeleteSubscriptionError",
             "message": "Error eliminando suscripción"
