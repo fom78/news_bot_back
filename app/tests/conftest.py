@@ -1,17 +1,57 @@
 import pytest
-from app import create_app, db
+from app import create_app, db as _db
+from flask_jwt_extended import create_access_token
+from app.auth.models import User
 
-@pytest.fixture(scope="module")
+
+# Este hook le avisa a pytest que usamos un marker custom
+def pytest_configure(config):
+    config.addinivalue_line("markers", "clean_users: limpia la tabla User antes del test")
+
+@pytest.fixture(autouse=True)
+def clean_users_marker(request):
+    if "clean_users" in request.keywords:
+        db = request.getfixturevalue("db") 
+        User.query.delete()
+        db.session.commit()
+
+@pytest.fixture(scope="session")
 def test_app():
-    # Usamos la configuración de testing que apunta a SQLite en memoria
-    app = create_app('testing')
+    """Crea una instancia de la app para toda la sesión de tests."""
+    app = create_app("testing")
+    return app
 
-    with app.app_context():
-        db.create_all()
-        yield app
-        db.session.remove()
-        db.drop_all()
+@pytest.fixture(scope="session")
+def db(test_app):
+    """Crea y destruye la base de datos para los tests."""
+    with test_app.app_context():
+        _db.create_all()
+        yield _db
+        _db.session.remove()
+        _db.drop_all()
 
-@pytest.fixture(scope="module")
+@pytest.fixture(scope="function", autouse=True)
+def session(db):
+    """Rollback automático para cada test (aislamiento)."""
+    db.session.begin_nested()
+    yield db.session
+    db.session.rollback()
+
+@pytest.fixture(scope="function")
 def test_client(test_app):
+    """Cliente para hacer requests de prueba."""
     return test_app.test_client()
+
+@pytest.fixture
+def new_user(db):
+    """Usuario de prueba para login, etc."""
+    user = User(phone_number="+111111111", password_hash="")
+    user.set_password("test123")
+    db.session.add(user)
+    db.session.commit()
+    return user
+
+@pytest.fixture
+def access_token(new_user):
+    """Genera un JWT válido para el usuario de prueba."""
+    return create_access_token(identity=new_user.phone_number)
