@@ -8,7 +8,7 @@ class AuthService:
     def register_user(cls, phone_number, password):
         user = User.query.filter_by(phone_number=phone_number).first()
         if user:
-            raise ValidationError("El número no está registrado")
+            raise ValidationError("El número está registrado")
 
 
         user = User(phone_number=phone_number)

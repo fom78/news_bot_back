@@ -6,7 +6,7 @@ from app.errors.handlers import register_error_handlers
 
 def create_app(config_name='default'):
     app = Flask(__name__)
-    app.config.from_object(config[config_name])
+    app.config.from_object(config[config_name])  
 
     # Inicializar extensiones
     db.init_app(app)
