@@ -5,6 +5,7 @@ from app.auth.models import User
 from app.errors.exceptions import ValidationError, AuthError
 from app.extensions import db
 
+@pytest.mark.clean_users
 def test_register_user_with_real_db(test_app):
     with test_app.app_context():
         # Asegurarse que la tabla está vacía al comenzar
