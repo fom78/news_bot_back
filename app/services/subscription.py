@@ -27,7 +27,10 @@ class SubscriptionService:
         cls.validate_categories(categories)
 
         new_subscriptions = []
-        existing_categories = {sub.category for sub in user.subscriptions}
+        # existing_categories = {sub.category for sub in user.subscriptions}
+        # Consulta directa a la base de datos para evitar caché
+        existing_categories = {s.category for s in 
+                   Subscription.query.filter_by(user_id=user.id).all()}
 
         try:
             for category in set(categories):

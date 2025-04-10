@@ -2,17 +2,18 @@ import pytest
 from app import create_app, db as _db
 from flask_jwt_extended import create_access_token
 from app.auth.models import User
-
+from app.models import Subscription
 
 # Este hook le avisa a pytest que usamos un marker custom
 def pytest_configure(config):
     config.addinivalue_line("markers", "clean_users: limpia la tabla User antes del test")
 
 @pytest.fixture(autouse=True)
-def clean_users_marker(request):
+def clean_users_marker(request,db):
     if "clean_users" in request.keywords:
-        db = request.getfixturevalue("db") 
-        User.query.delete()
+        # Limpiar todas las tablas relevantes
+        db.session.execute(db.delete(Subscription))
+        db.session.execute(db.delete(User))
         db.session.commit()
 
 @pytest.fixture(scope="session")
