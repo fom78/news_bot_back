@@ -3,6 +3,7 @@ from app import create_app, db as _db
 from flask_jwt_extended import create_access_token
 from app.auth.models import User
 from app.models import Subscription
+import random
 
 # Este hook le avisa a pytest que usamos un marker custom
 def pytest_configure(config):
@@ -53,6 +54,12 @@ def new_user(db):
     return user
 
 @pytest.fixture
-def access_token(new_user):
-    """Genera un JWT válido para el usuario de prueba."""
-    return create_access_token(identity=new_user.phone_number)
+def access_token(test_client):
+    """Genera un JWT con usuario único para cada test"""
+    phone = f"+1{random.randint(100000000, 999999999)}"  # Número único
+    user = User(phone_number=phone)
+    user.set_password("test123")
+    db.session.add(user)
+    db.session.commit()
+    return create_access_token(identity=phone)
+
