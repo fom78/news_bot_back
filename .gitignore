@@ -3,7 +3,6 @@ env/
 
 # Configuración de entorno
 *.env
-.env.*
 
 # Archivos Python compilados
 __pycache__/
