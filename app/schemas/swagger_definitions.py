@@ -1,7 +1,9 @@
 # app/schemas/swagger_definitions.py
 
 swagger_config = {
-    "headers": [],
+    "headers": [
+        ("X-Demo-Mode", "true")
+    ],
     "specs": [
         {
             "endpoint": "apispec",

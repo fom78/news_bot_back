@@ -15,10 +15,18 @@ class DevelopmentConfig(Config):
 class TestingConfig(Config):
     TESTING = True
     SQLALCHEMY_DATABASE_URI = "sqlite:///:memory:"
+class DemoConfig:
+    SQLALCHEMY_DATABASE_URI = 'sqlite:///:memory:'
+    SQLALCHEMY_TRACK_MODIFICATIONS = False
+    SECRET_KEY = 'demo-secret'
+class SwaggerConfig(Config):
+    SQLALCHEMY_DATABASE_URI = os.getenv('DATABASE_SWAGGER_URL', 'sqlite:///db_swagger1.db')
+    DEBUG = True
 
 
 config = {
     'development': DevelopmentConfig,
     'testing': TestingConfig,
+    'swagger': SwaggerConfig,
     'default': DevelopmentConfig
 }
