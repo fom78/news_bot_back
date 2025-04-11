@@ -13,6 +13,44 @@ login_schema = LoginSchema()
 
 @auth_bp.route('/register', methods=['POST'])
 def register():
+    """
+    Registro de nuevo usuario
+    ---
+    tags:
+      - Autenticación
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Register'
+    responses:
+      201:
+        description: Usuario registrado exitosamente
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                message:
+                  type: string
+                  example: Usuario registrado exitosamente
+                phone_number:
+                  type: string
+                  example: +549123456789
+      400:
+        description: Error de validación
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Error'
+      500:
+        description: Error interno del servidor
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Error'
+    """
     try:
         data = register_schema.load(request.get_json())
         user = AuthService.register_user(
@@ -41,6 +79,46 @@ def register():
 
 @auth_bp.route('/login', methods=['POST'])
 def login():
+    """
+    Autenticación de usuario
+    ---
+    tags:
+      - Autenticación
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Login'
+    responses:
+      200:
+        description: Login exitoso
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                access_token:
+                  type: string
+                  example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+                user:
+                  type: object
+                  properties:
+                    phone_number:
+                      $ref: '#/components/schemas/Register/properties/phone_number'
+      401:
+        description: Credenciales inválidas
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Error'
+      500:
+        description: Error interno
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Error'
+    """
     try:
         data = login_schema.load(request.get_json())
         user = AuthService.authenticate_user(

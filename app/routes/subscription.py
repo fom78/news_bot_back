@@ -8,6 +8,39 @@ subscription_bp = Blueprint('subscription', __name__)
 @subscription_bp.route('/subscriptions', methods=['POST'])
 @jwt_required()
 def create_subscription():
+    """
+    Crear nuevas suscripciones
+    ---
+    tags:
+      - Suscripciones
+    security:
+      - BearerAuth: []
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/SubscriptionRequest'
+    responses:
+      201:
+        description: Suscripciones creadas
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                type: object
+                properties:
+                  category:
+                    type: string
+                    example: deportes
+      400:
+        description: Error de validación
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Error'
+    """
     try:
         current_phone = get_jwt_identity()
         data = request.get_json()
