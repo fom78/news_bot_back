@@ -21,11 +21,13 @@ def create_app(config_name='default'):
     swagger.init_app(app)
 
     # Registrar Blueprints
+    from app.routes.home import home_bp
     from app.routes.subscription import subscription_bp
     from app.auth.routes import auth_bp
 
     app.register_blueprint(subscription_bp, url_prefix='/api')
     app.register_blueprint(auth_bp, url_prefix='/api/auth')
+    app.register_blueprint(home_bp)
 
 
     # Registrar manejadores de errores
