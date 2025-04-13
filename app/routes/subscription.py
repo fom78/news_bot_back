@@ -2,6 +2,7 @@ from flask import Blueprint, request, jsonify
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from app.services.subscription import SubscriptionService
 from app.errors.exceptions import ValidationError, NotFoundError
+from app.schemas.subscription_schema import VALID_CATEGORIES
 
 subscription_bp = Blueprint('subscription', __name__)
 
@@ -15,6 +16,7 @@ def create_subscription():
       - Suscripciones
     security:
       - BearerAuth: []
+    summary: Crear una o varias suscripciones nuevas
     requestBody:
       required: true
       content:
@@ -23,7 +25,7 @@ def create_subscription():
             $ref: '#/components/schemas/SubscriptionRequest'
     responses:
       201:
-        description: Suscripciones creadas
+        description: Suscripciones creadas exitosamente
         content:
           application/json:
             schema:
@@ -40,6 +42,8 @@ def create_subscription():
           application/json:
             schema:
               $ref: '#/components/schemas/Error'
+      500:
+        description: Error inesperado del servidor
     """
     try:
         current_phone = get_jwt_identity()
@@ -63,6 +67,32 @@ def create_subscription():
 @subscription_bp.route('/subscriptions', methods=['GET'])
 @jwt_required()
 def get_subscriptions():
+    """
+    Obtener suscripciones del usuario
+    ---
+    tags:
+      - Suscripciones
+    security:
+      - BearerAuth: []
+    summary: Retorna las categorías a las que el usuario está suscripto
+    responses:
+      200:
+        description: Lista de suscripciones activas
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                type: object
+                properties:
+                  category:
+                    type: string
+                    example: cultura
+      404:
+        description: Usuario no encontrado
+      500:
+        description: Error inesperado del servidor
+    """
     try:
         current_phone = get_jwt_identity()
         user = SubscriptionService.get_user_by_phone(current_phone)
@@ -82,6 +112,42 @@ def get_subscriptions():
 @subscription_bp.route('/subscriptions', methods=['PUT'])
 @jwt_required()
 def update_subscriptions():
+    """
+    Reemplazar suscripciones actuales
+    ---
+    tags:
+      - Suscripciones
+    security:
+      - BearerAuth: []
+    summary: Reemplaza todas las suscripciones del usuario por una nueva lista
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/SubscriptionRequest'
+    responses:
+      200:
+        description: Suscripciones actualizadas correctamente
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                type: object
+                properties:
+                  category:
+                    type: string
+                    example: tecnología
+      400:
+        description: Datos inválidos
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Error'
+      500:
+        description: Error inesperado del servidor
+    """
     try:
         current_phone = get_jwt_identity()
         data = request.get_json()
@@ -101,6 +167,41 @@ def update_subscriptions():
 @subscription_bp.route('/subscriptions/<string:category>', methods=['DELETE'])
 @jwt_required()
 def delete_subscription(category):
+    """
+    Eliminar suscripción específica
+    ---
+    tags:
+      - Suscripciones
+    security:
+      - BearerAuth: []
+    summary: Elimina una categoría específica de suscripción del usuario
+    parameters:
+      - name: category
+        in: path
+        required: true
+        schema:
+          type: string
+          enum: ["deportes", "tecnología", "economía", "cultura"]
+        description: Categoría a eliminar
+    responses:
+      200:
+        description: Suscripción eliminada
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                message:
+                  type: string
+                  example: Suscripción eliminada exitosamente
+                category:
+                  type: string
+                  example: deportes
+      404:
+        description: Suscripción no encontrada
+      500:
+        description: Error inesperado del servidor
+    """
     try:
         current_phone = get_jwt_identity()
         user = SubscriptionService.get_user_by_phone(current_phone)
@@ -119,7 +220,6 @@ def delete_subscription(category):
             "message": "Error eliminando suscripción"
         }), 500
 
-
 @subscription_bp.route('/subscriptions/categories', methods=['GET'])
 def get_categories():
     """
@@ -127,10 +227,10 @@ def get_categories():
     ---
     tags:
       - Suscripciones
-    summary: Obtener categorías válidas para suscripción
+    summary: Devuelve la lista de categorías válidas para suscripción
     responses:
       200:
-        description: Lista de categorías válidas
+        description: Categorías disponibles
         content:
           application/json:
             schema:
@@ -140,7 +240,6 @@ def get_categories():
                   type: array
                   items:
                     type: string
-                    example: deportes
+                    example: tecnología
     """
-    from app.schemas.subscription_schema import VALID_CATEGORIES
     return jsonify({"categories": sorted(VALID_CATEGORIES)}), 200
