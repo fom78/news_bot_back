@@ -1,4 +1,5 @@
 from flask import Flask, request, g
+from flask_cors import CORS
 from sqlalchemy import create_engine
 from sqlalchemy.orm import scoped_session, sessionmaker
 
@@ -9,6 +10,7 @@ from app.errors.handlers import register_error_handlers
 
 def create_app(config_name='default'):
     app = Flask(__name__)
+    CORS(app)
     app.config.from_object(config[config_name])  
 
     # Swagger UI config
