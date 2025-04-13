@@ -16,13 +16,14 @@ def test_register_success(test_client):
     data = response.get_json()
 
     assert response.status_code == 201
-    assert data["message"] == "Usuario registrado exitosamente"
-    assert data["phone_number"] == PHONE
+    assert "access_token" in data
+    assert data["user"]["phone_number"] == PHONE
 
     # Aseguramos que el usuario quedó en la DB
     user = User.query.filter_by(phone_number=PHONE).first()
     assert user is not None
     assert user.phone_number == PHONE
+
 
 def test_register_existing_user(test_client):
     # Intentamos registrar el mismo número otra vez

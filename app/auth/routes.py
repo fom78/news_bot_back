@@ -1,4 +1,3 @@
-# app/auth/routes.py
 from flask import Blueprint, request, jsonify
 from flask_jwt_extended import create_access_token
 from marshmallow import ValidationError as MarshmallowValidationError
@@ -32,12 +31,15 @@ def register():
             schema:
               type: object
               properties:
-                message:
+                access_token:
                   type: string
-                  example: Usuario registrado exitosamente
-                phone_number:
-                  type: string
-                  example: +549123456789
+                  example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+                user:
+                  type: object
+                  properties:
+                    phone_number:
+                      type: string
+                      example: +549123456789
       400:
         description: Error de validación
         content:
@@ -58,17 +60,19 @@ def register():
             data['password']
         )
 
+        access_token = create_access_token(identity=user.phone_number)
         return jsonify({
-            "message": "Usuario registrado exitosamente",
-            "phone_number": user.phone_number
+            "access_token": access_token,
+            "user": {
+                "phone_number": user.phone_number
+            }
         }), 201
 
     except MarshmallowValidationError as err:
-        # return jsonify({"errors": err.messages}), 400
         raise ValidationError("Datos inválidos", payload=err.messages)
     except ValidationError as e:
         return jsonify(e.to_dict()), e.status_code
-    except Exception as error:
+    except Exception:
         return jsonify({
             "error": {
                 "type": "AuthenticationError",
