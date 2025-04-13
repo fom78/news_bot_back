@@ -118,3 +118,29 @@ def delete_subscription(category):
             "error_type": "DeleteSubscriptionError",
             "message": "Error eliminando suscripción"
         }), 500
+
+
+@subscription_bp.route('/subscriptions/categories', methods=['GET'])
+def get_categories():
+    """
+    Obtener categorías disponibles
+    ---
+    tags:
+      - Suscripciones
+    summary: Obtener categorías válidas para suscripción
+    responses:
+      200:
+        description: Lista de categorías válidas
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                categories:
+                  type: array
+                  items:
+                    type: string
+                    example: deportes
+    """
+    from app.schemas.subscription_schema import VALID_CATEGORIES
+    return jsonify({"categories": sorted(VALID_CATEGORIES)}), 200
