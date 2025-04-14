@@ -1,5 +1,5 @@
 # app/routes/home.py
-from flask import Blueprint, jsonify
+from flask import Blueprint, jsonify, redirect
 
 home_bp = Blueprint('home', __name__)
 
@@ -16,3 +16,7 @@ def home():
         },
         "repository": "https://github.com/fom78/news_bot_back"
     })
+
+@home_bp.route("/swagger")
+def swagger_ui():
+    return redirect("/api/swagger")

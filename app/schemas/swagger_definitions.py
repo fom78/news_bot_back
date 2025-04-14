@@ -1,5 +1,7 @@
 # app/schemas/swagger_definitions.py
+import os
 
+BASE_PATH = os.getenv("BASE_PATH", "")  # Por defecto vacío para local
 swagger_config = {
     "headers": [
         ("X-Demo-Mode", "true")
@@ -12,9 +14,9 @@ swagger_config = {
             "model_filter": lambda tag: True,
         }
     ],
-    "static_url_path": "/flasgger_static",
+    "static_url_path": f"/flasgger_static",
     "swagger_ui": True,
-    "specs_route": "/swagger/",
+    "specs_route": f"{BASE_PATH}/api/swagger/",
     "openapi": "3.0.3",  # Solo esta línea es crítica
 }
 
